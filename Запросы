@@ -1,0 +1,56 @@
+SELECT genrename, COUNT(name) FROM genre g
+JOIN genreartist ga ON g.genreid = ga.genreid
+JOIN artist a ON ga.artistid = a.artistid
+GROUP BY genrename;
+
+SELECT albumname, COUNT(trackname) FROM album a
+JOIN track t ON a.albumid = t.albumid
+WHERE year BETWEEN 2019 AND 2020
+GROUP BY albumname;
+
+SELECT albumname, AVG(tracklength) FROM album a
+JOIN track t ON a.albumid = t.albumid
+GROUP BY albumname;
+
+SELECT name, year FROM artist ar
+JOIN artistalbum aa ON ar.artistid = aa.artistid
+JOIN album al ON aa.albumid = al.albumid
+WHERE year != 2020
+
+SELECT c.name FROM collection c
+JOIN collectiontracks ct ON c.collectionid = ct.collectionid
+JOIN track t ON ct.trackid = t.trackid
+JOIN album al ON t.albumid = al.albumid
+JOIN artistalbum aa ON al.albumid = aa.albumid
+JOIN artist ar ON aa.artistid = ar.artistid
+WHERE ar.name = 'Doja Cat'
+
+SELECT albumname, COUNT(genrename) FROM album al
+JOIN artistalbum aa ON al.albumid = aa.albumid
+JOIN artist ar ON aa.artistid = ar.artistid
+JOIN genreartist ga ON ar.artistid = ga.artistid
+JOIN genre g ON ga.genreid = g.genreid
+GROUP BY albumname
+HAVING COUNT(genrename) > 1
+
+SELECT trackname FROM track t
+FULL OUTER JOIN collectiontracks ct ON t.trackid = ct.trackid
+LEFT JOIN collection c ON ct.collectionid = c.collectionid
+WHERE c.collectionid IS NULL
+
+SELECT ar.name, t.tracklength from artist ar
+JOIN artistalbum aa ON ar.artistid = aa.artistid
+JOIN album al ON aa.albumid = al.albumid
+JOIN track t ON al.albumid = t.albumid
+WHERE t.tracklength = (
+SELECT MIN(t.tracklength) FROM track t
+)
+
+SELECT al.albumname, COUNT(t.trackname) from album al
+JOIN track t ON al.albumid = t.albumid
+GROUP BY al.albumname
+HAVING COUNT(t.trackname) = (
+	SELECT MIN(count) FROM (
+		SELECT al.albumname, COUNT(t.trackname) from album al
+		JOIN track t ON al.albumid = t.albumid
+		GROUP BY al.albumname) AS foo)
